@@ -31,22 +31,24 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        //validate form
-        $this->validate($request, [
+        // Validate the form
+        $request->validate([
             'image'     => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title'     => 'required|min:5',
-            'content'   => 'required|min:10'
+            'title'     => 'required|string|min:5|max:255',
+            'content'   => 'required|string|min:10'
         ]);
 
-        //upload image
-        $image = $request->file('image');
-        $image->storeAs('public/posts', $image->hashName());
+        // Upload image
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imagePath = $image->storeAs('public/posts', $image->hashName());
+        }
 
-        //create post
+        // Create post
         Post::create([
             'image'     => $image->hashName(),
-            'title'     => $request->title,
-            'content'   => $request->content
+            'title'     => $request->input('title'),
+            'content'   => $request->input('content')
         ]);
 
         //redirect to index
